@@ -2,6 +2,13 @@
 import 'dart:cli';
 import 'dart:io';
 
+String run_to_get(
+  final String command,
+  final List<String> args,
+) {
+  return Process.runSync(command, args).stdout.toString().trim();
+}
+
 /// Prints, and runs the given command with the given arguments.
 void run(
   final String command,

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'util/clean_dir.dart';
 import 'util/run.dart';
 
-// https://smist08.wordpress.com/2021/01/08/apple-m1-assembly-language-hello-world/
+/// Chapter 01: https://github.com/below/HelloSilicon
 Future<void> main() async {
   const assembly = r"""
 // Assembler program to print "Hello World!"
@@ -68,10 +68,10 @@ helloworld:
       asm_o_filename,
       "-lSystem",
       "-syslibroot",
-      Process.runSync("xcrun", ["-sdk", "macosx", "--show-sdk-path"])
-          .stdout
-          .toString()
-          .trim(),
+      run_to_get(
+        "xcrun",
+        ["-sdk", "macosx", "--show-sdk-path"],
+      ),
       "-e",
       "_start",
       "-arch",
