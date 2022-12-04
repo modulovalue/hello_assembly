@@ -4,7 +4,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:mirrors';
 
-/// Given a [type] returns the Directory of the file where it was declared.
+/// Given a [type] returns the Directory of the
+/// file where the given type was declared.
 Directory self_dir(
   final Type type,
 ) {

@@ -1,3 +1,17 @@
+import '../util/basic/clean_dir.dart';
+import '../util/basic/run.dart';
+import '../util/higher/assembly_to_object.dart';
+import '../util/higher/link_assembly.dart';
+import '../util/higher/write_assembly.dart';
+
+/// Chapter 01: https://github.com/below/HelloSilicon
+Future<void> main() async {
+  final root_dir = clean_dir(
+    type: _Type,
+    dir_name: "output",
+  );
+  final filename = root_dir + "hello_arm64";
+  final assembly = r"""
 // Assembler program to print "Hello World!"
 // to stdout.
 // X0-X2 - parameters to linux function services
@@ -19,3 +33,19 @@ _start:
   svc     0           // Call MacOS to terminate the program
 helloworld:      
   .ascii  "Hello World!\n"
+""";
+  run_command(
+    command: link_assembly(
+      input: assembly_to_object(
+        input: string_to_file(
+          path: filename + ".s",
+          content: assembly,
+        ),
+        output: filename + ".o",
+      ),
+      output: filename + ".exe",
+    ),
+  );
+}
+
+abstract class _Type {}
