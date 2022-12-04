@@ -2,11 +2,16 @@
 import 'dart:cli';
 import 'dart:io';
 
+/// Calls the given command with the given arguments and
+/// returns its trimmed output.
 String run_to_get(
   final String command,
   final List<String> args,
 ) {
-  return Process.runSync(command, args).stdout.toString().trim();
+  return Process.runSync(
+    command,
+    args,
+  ).stdout.toString().trim();
 }
 
 /// Prints, and runs the given command with the given arguments.

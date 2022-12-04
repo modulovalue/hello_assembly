@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'util.dart';
 
+/// Return a path to the given directory. Removes it if it already exists.
 String clean_dir({
   required final Type type,
   required final String dir_name,
