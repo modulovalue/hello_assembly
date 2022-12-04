@@ -2,6 +2,7 @@ import 'package:ffi/ffi.dart';
 
 import '../util/basic/clean_dir.dart';
 import '../util/higher/assembly_to_object.dart';
+import '../util/higher/binary_to_objdump.dart';
 import '../util/higher/dylib_to_exports.dart';
 import '../util/higher/object_to_dylib.dart';
 import '../util/higher/write_assembly.dart';
@@ -28,16 +29,21 @@ Future<void> main() async {
 
 _mytoupper:
 	MOV	X4, X1
+
 // The loop is until byte pointed to by X1 is non-zero
 loop:	LDRB	W5, [X0], #1	// load character and increment pointer
+
 // If W5 > 'z' then goto cont
 	CMP	W5, #'z'	    // is letter > 'z'?
 	B.GT	cont
+	
 // Else if W5 < 'a' then goto end if
 	CMP	W5, #'a'
 	B.LT	cont	// goto to end if
-// if we got here then the letter is lower case, so convert it.
+	
+// If we got here then the letter is lower case, so convert it.
 	SUB	W5, W5, #('a'-'A')
+	
 cont:	// end if
 	STRB	W5, [X1], #1	// store character to output str
 	CMP	W5, #0		// stop on hitting a null character
@@ -59,7 +65,12 @@ cont:	// end if
     dylib_output,
   );
   print(
-    "The created dylib exports: \n" +
+    binary_to_objdump(
+      input: dylib_output,
+    ),
+  );
+  print(
+    "Here are the exports provided by the dylib: \n" +
         dylib_to_exports(
           input: dylib_output,
         ),

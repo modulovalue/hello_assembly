@@ -12,6 +12,6 @@ String dylib_to_exports({
     ],
   ).splitMapJoin(
     "\n",
-    onNonMatch: (final a) => "* " + a,
+    onNonMatch: (final a) => " * " + a,
   );
 }

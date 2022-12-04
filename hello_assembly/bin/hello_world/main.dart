@@ -1,6 +1,7 @@
 import '../util/basic/clean_dir.dart';
 import '../util/basic/run.dart';
 import '../util/higher/assembly_to_object.dart';
+import '../util/higher/binary_to_objdump.dart';
 import '../util/higher/link_assembly.dart';
 import '../util/higher/write_assembly.dart';
 
@@ -34,16 +35,22 @@ _start:
 helloworld:      
   .ascii  "Hello World!\n"
 """;
-  run_command(
-    command: link_assembly(
-      input: assembly_to_object(
-        input: string_to_file(
-          path: filename + ".s",
-          content: assembly,
-        ),
-        output: filename + ".o",
+  final binary = link_assembly(
+    input: assembly_to_object(
+      input: string_to_file(
+        path: filename + ".s",
+        content: assembly,
       ),
-      output: filename + ".exe",
+      output: filename + ".o",
+    ),
+    output: filename + ".exe",
+  );
+  run_command(
+    command: binary,
+  );
+  print(
+    binary_to_objdump(
+      input: binary,
     ),
   );
 }
