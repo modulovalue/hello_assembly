@@ -5,7 +5,7 @@ import '../util/higher/link_assembly.dart';
 import '../util/higher/write_assembly.dart';
 
 /// Chapter 01: https://github.com/below/HelloSilicon
-Future<void> main() async {
+void main() {
   final filename = clean_dir(
         type: _Type,
         dir_name: "output",
