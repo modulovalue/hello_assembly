@@ -30,6 +30,18 @@ _start:
   RET
 helloworld:      
   .ascii  "Hello World!\n"
+  
+  
+.global count_bits
+
+count_bits:
+  vmov.32 d0[0], r0
+  vcnt.8  d0, d0
+  vmov.32 r0, d0[0]
+  add r0, r0, r0, lsr #16
+  add r0, r0, r0, lsr #8
+  and r0, r0, #31
+  RET
 """,
           path: filename + ".s",
         ),
