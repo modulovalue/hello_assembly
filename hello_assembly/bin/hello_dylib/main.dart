@@ -1,41 +1,59 @@
-import 'package:ffi/ffi.dart';
-
-import '../util/basic/clean_dir.dart';
-import '../util/higher/assembly_to_object.dart';
-import '../util/higher/debug_dylib.dart';
-import '../util/higher/object_to_dylib.dart';
-import '../util/higher/write_assembly.dart';
 import 'dart:ffi';
 
-/// Chapter 09: https://github.com/below/HelloSilicon
+import 'package:ffi/ffi.dart';
+
+import '../commander/commands.dart';
+import '../commander/runner.dart';
+
 void main() {
-  final root_dir = clean_dir(
-    type: _Type,
-    dir_name: "output",
-  );
-  final filename = root_dir + "hello_dylib";
+  final filename = clean_dir(type: _Type, dir_name: "output") + "hello_dylib";
+  final assembly_path = filename + ".s";
+  final object_path = filename + ".o";
+  final dylib_path = filename + ".dylib";
   final program = Bindings._program().join("\n");
-  final dylib_path = object_to_dylib(
-    input: assembly_to_object(
-      input: string_to_file(
-        path: filename + ".s",
-        content: program,
-      ),
-      output: filename + ".o",
+  run_Commander(
+    commander: Commander_Commands_Impl(
+      commands: [
+        Command_WriteString_Impl(
+          path: assembly_path,
+          content: program,
+        ),
+        Command_as_Impl(
+          input: assembly_path,
+          output: object_path,
+        ),
+        Command_clang_Impl(
+          input: object_path,
+          output: dylib_path,
+        )
+      ],
     ),
-    output: filename + ".dylib",
   );
   final bindings = Bindings(
     dylib: DynamicLibrary.open(
       dylib_path,
     ),
   );
-  debug_dylib(
-    dylib_path: dylib_path,
+  print(
+    run_and_take_output_commander(
+      Command_objdump_Impl(
+        input: dylib_path,
+      ),
+    ),
+  );
+  print(
+    run_and_take_output_commander(
+      Object_nm_Impl(
+        input: dylib_path,
+      ),
+    ).splitMapJoin(
+      "\n",
+      onNonMatch: (final a) => " * " + a,
+    ),
   );
   print(
     bindings.call_wrapped_example(
-      dart_string: "this is my string! 123 abc ABC",
+      dart_string: "lowercase: abc, uppercase: ABC",
     ),
   );
   bindings.svc4_stdout();
@@ -78,52 +96,52 @@ class Bindings {
           "	 SUB X0, X1, X4",
         ],
       ),
-      """
-// Example function to calculate the distance
-// between 4D two points in single precision
-// floating point using the NEON Processor
-// Inputs:
-//	X0 - pointer to the 8 FP numbers
-//		they are (x1, x2, x3, x4),
-//			 (y1, y2, y3, y4)
-// Outputs:
-//	W0 - the length (as single precision FP)
-.global _distance // Allow function to be called by others
-.align 4
-
-_distance:	
-	// load all 4 numbers at once
-	LDP	Q2, Q3, [X0]	
-	FMUL V1.4S, V2.4S, V3.4S
-	// // calc V1 = V2 - V3
-	// FSUB	V1.4S, V2.4S, V3.4S
-	// // calc V1 = V1 * V1 = (xi-yi)^2
-	// FMUL	V1.4S, V1.4S, V1.4S
-	// // calc S0 = S0 + S1 + S2 + S3
-	// FADDP	V0.4S, V1.4S, V1.4S
-	// FADDP	V0.4S, V0.4S, V0.4S
-	// // // calc sqrt(S0)
-	// // FSQRT	S4, S0 
-	// // move result to W0 to be returned
-	// FMOV	W0, S4
-	// FMOV	X0, R0
-	RET
-""",
-      ..._macro_fn2(
-        name: neon_example,
-        body: [
-          "ldr q0, [x0]",
-          "movi v1.2d, #0x00ff0000000000ff",
-          "umin v0.8h, v0.8h, v1.8h",
-          "str q0, [x0]",
-        ],
-      ),
-      ..._macro_fn2(
-        name: popcount_name,
-        body: [
-          "add x0, x1, #10",
-        ],
-      ),
+//       """
+// // Example function to calculate the distance
+// // between 4D two points in single precision
+// // floating point using the NEON Processor
+// // Inputs:
+// //	X0 - pointer to the 8 FP numbers
+// //		they are (x1, x2, x3, x4),
+// //			 (y1, y2, y3, y4)
+// // Outputs:
+// //	W0 - the length (as single precision FP)
+// .global _distance // Allow function to be called by others
+// .align 4
+//
+// _distance:
+// 	// load all 4 numbers at once
+// 	LDP	Q2, Q3, [X0]
+// 	FMUL V1.4S, V2.4S, V3.4S
+// 	// // calc V1 = V2 - V3
+// 	// FSUB	V1.4S, V2.4S, V3.4S
+// 	// // calc V1 = V1 * V1 = (xi-yi)^2
+// 	// FMUL	V1.4S, V1.4S, V1.4S
+// 	// // calc S0 = S0 + S1 + S2 + S3
+// 	// FADDP	V0.4S, V1.4S, V1.4S
+// 	// FADDP	V0.4S, V0.4S, V0.4S
+// 	// // // calc sqrt(S0)
+// 	// // FSQRT	S4, S0
+// 	// // move result to W0 to be returned
+// 	// FMOV	W0, S4
+// 	// FMOV	X0, R0
+// 	RET
+// """,
+//       ..._macro_fn2(
+//         name: neon_example,
+//         body: [
+//           "ldr q0, [x0]",
+//           "movi v1.2d, #0x00ff0000000000ff",
+//           "umin v0.8h, v0.8h, v1.8h",
+//           "str q0, [x0]",
+//         ],
+//       ),
+//       ..._macro_fn2(
+//         name: popcount_name,
+//         body: [
+//           "add x0, x1, #10",
+//         ],
+//       ),
       // TODO service command code 0?
       ..._macro_system_1_terminate(
         label: quit_name,
@@ -152,31 +170,30 @@ _distance:
   String call_wrapped_example({
     required final String dart_string,
   }) {
-    final popcount =
-        dylib.lookupFunction<Int Function(Int, Int), int Function(int, int)>(
-      popcount_name,
-    );
-    // print(popcount(1000, 100));
-    final neon_example =
-        dylib.lookupFunction<Void Function(Pointer), void Function(Pointer)>(
-      'neon_example',
-    );
-    // final distance =
-    //     dylib.lookupFunction<Float Function(Pointer), double Function(Pointer)>(
-    //   'distance',
+    // final popcount =
+    //     dylib.lookupFunction<Int Function(Int, Int), int Function(int, int)>(
+    //   popcount_name,
     // );
-    final aa = malloc.allocate<Uint16>(sizeOf<Uint16>() * 8)
-      ..elementAt(3).value = 999
-      ..elementAt(2).value = 999
-      ..elementAt(1).value = 999
-      ..elementAt(0).value = 999
-    ;
-    neon_example(aa);
-    print(aa.elementAt(3).value);
-    print(aa.elementAt(2).value);
-    print(aa.elementAt(1).value);
-    print(aa.elementAt(0).value);
-    malloc.free(aa);
+    // // print(popcount(1000, 100));
+    // final neon_example =
+    //     dylib.lookupFunction<Void Function(Pointer), void Function(Pointer)>(
+    //   'neon_example',
+    // );
+    // // final distance =
+    // //     dylib.lookupFunction<Float Function(Pointer), double Function(Pointer)>(
+    // //   'distance',
+    // // );
+    // final aa = malloc.allocate<Uint16>(sizeOf<Uint16>() * 8)
+    //   ..elementAt(3).value = 999
+    //   ..elementAt(2).value = 999
+    //   ..elementAt(1).value = 999
+    //   ..elementAt(0).value = 999;
+    // neon_example(aa);
+    // print(aa.elementAt(3).value);
+    // print(aa.elementAt(2).value);
+    // print(aa.elementAt(1).value);
+    // print(aa.elementAt(0).value);
+    // malloc.free(aa);
     // print(
     //   dylib
     //       .lookupFunction<Pointer Function(Pointer),

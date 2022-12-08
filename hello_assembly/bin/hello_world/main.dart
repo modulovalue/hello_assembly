@@ -1,21 +1,12 @@
-import '../util/basic/clean_dir.dart';
-import '../util/basic/run.dart';
-import '../util/higher/assembly_to_object.dart';
-import '../util/higher/link_assembly.dart';
-import '../util/higher/write_assembly.dart';
+import '../commander/commands.dart';
+import '../commander/runner.dart';
 
-/// Chapter 01: https://github.com/below/HelloSilicon
 void main() {
-  final filename = clean_dir(
-        type: _Type,
-        dir_name: "output",
-      ) +
-      "hello_arm64";
-  run_command(
-    command: link_assembly(
-      input: assembly_to_object(
-        input: string_to_file(
-          content: r"""
+  final filename = clean_dir(type: _Type, dir_name: "output") + "hello_arm64";
+  final assembly_path = filename + ".s";
+  final object_path = filename + ".o";
+  final binary_path = filename + ".exe";
+  const assembly = r"""
 // Assembler program to print "Hello World!" to stdout.
 // X0-X2 - parameters to linux function services.
 // X16 - linux function number.
@@ -30,24 +21,26 @@ _start:
   RET
 helloworld:      
   .ascii  "Hello World!\n"
-  
-  
-.global count_bits
-
-count_bits:
-  vmov.32 d0[0], r0
-  vcnt.8  d0, d0
-  vmov.32 r0, d0[0]
-  add r0, r0, r0, lsr #16
-  add r0, r0, r0, lsr #8
-  and r0, r0, #31
-  RET
-""",
-          path: filename + ".s",
+""";
+  run_Commander(
+    commander: Commander_Commands_Impl(
+      commands: [
+        Command_WriteString_Impl(
+          path: assembly_path,
+          content: assembly,
         ),
-        output: filename + ".o",
-      ),
-      output: filename + ".exe",
+        Command_as_Impl(
+          input: assembly_path,
+          output: object_path,
+        ),
+        Command_ld_Impl(
+          input: object_path,
+          output: binary_path,
+        ),
+        Command_binary_Impl(
+          c: binary_path,
+        ),
+      ],
     ),
   );
 }
