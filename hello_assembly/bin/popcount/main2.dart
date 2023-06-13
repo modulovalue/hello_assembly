@@ -4,12 +4,7 @@ import '../commander/commands.dart';
 import '../commander/runner.dart';
 
 void main() {
-  // // Force loading the dylib with RLTD_GLOBAL so that the
-  // // Native benchmarks below can do process lookup.
-  // dlopenGlobalPlatformSpecific(
-  //   'native_functions',
-  //   path: Platform.script.resolve('../native/out/').path,
-  // );
+
   final filename = clean_dir(type: _Type, dir_name: "output") + "hello_dylib";
   final assembly_path = filename + ".s";
   final object_path = filename + ".o";
@@ -49,10 +44,6 @@ _popcount:
 void run(
   final DynamicLibrary dylib,
 ) {
-  int id(
-    final int i,
-  ) =>
-      i;
   final popcount_leaf =
       dylib.lookupFunction<Uint32 Function(Uint32), int Function(int)>(
     'popcount',
