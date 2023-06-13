@@ -17,8 +17,6 @@ void main() {
 .p2align 2
 .global _popcount
 _popcount:
-    // TODO
-    mov x0, x1
     ret
 """,
         ),
@@ -47,9 +45,9 @@ void run(
     final int i,
   ) =>
       i;
-  final popcount =
-      dylib.lookupFunction<Int64 Function(Int64), int Function(int)>(
+  final popcount = dylib.lookupFunction<Uint64 Function(Uint64), int Function(int)>(
     'popcount',
+    isLeaf: true,
   );
   const iterations = 1000000;
   for (int i = 0; i < 20; i++) {
