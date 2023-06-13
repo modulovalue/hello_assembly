@@ -18,7 +18,7 @@ void main() {
 .global _popcount
 _popcount:
     // TODO
-    mov x0, #42
+    mov x0, x1
     ret
 """,
         ),
@@ -58,21 +58,21 @@ void run(
       fn: () {
         int total = 0;
         for (int i = 0; i < iterations; i++) {
-          total += popcount(i);
-        }
-        print(" - total: " + total.toString());
-      },
-      name: "   => via assembly",
-    );
-    measure(
-      fn: () {
-        int total = 0;
-        for (int i = 0; i < iterations; i++) {
           total += count_bits_64_popcount(i);
         }
         print(" - total: " + total.toString());
       },
       name: "   => via lookup table",
+    );
+    measure(
+      fn: () {
+        int total = 0;
+        for (int i = 0; i < iterations; i++) {
+          total += popcount(i);
+        }
+        print(" - total: " + total.toString());
+      },
+      name: "   => via assembly",
     );
     measure(
       fn: () {
@@ -92,11 +92,20 @@ void run(
         }
         print(" - total: " + total.toString());
       },
-      name: "   => id control with function call",
+      name: "   => id control via closure call",
+    );
+    measure(
+      fn: () {
+        int total = 0;
+        for (int i = 0; i < iterations; i++) {
+          total += id_fn(i);
+        }
+        print(" - total: " + total.toString());
+      },
+      name: "   => id control via function call",
     );
     print("=" * 80);
   }
-
 }
 
 int count_bits_64_popcount(
@@ -127,6 +136,11 @@ int count_bits_64_popcount(
       lookup_table.codeUnitAt((value_64_bits >>> 56) & 0xFF);
 }
 
+@pragma('vm:never-inline')
+int id_fn(
+  final int i,
+) =>
+    i;
 
 void measure({
   required final void Function() fn,
