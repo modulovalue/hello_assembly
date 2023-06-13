@@ -8,7 +8,7 @@ class Commander_Commands_Impl with Commander_Commands_Mixin {
   final List<Command> commands;
 
   const Commander_Commands_Impl({
-    required final this.commands,
+    required this.commands,
   });
 }
 // endregion
@@ -21,7 +21,7 @@ class Command_binary_Impl with Command_Process_Mixin {
   final String c;
 
   const Command_binary_Impl({
-    required final this.c,
+    required this.c,
   });
 
   @override
@@ -38,8 +38,8 @@ class Command_as_Impl with Command_Process_Mixin {
   final String output;
 
   const Command_as_Impl({
-    required final this.input,
-    required final this.output,
+    required this.input,
+    required this.output,
   });
 
   @override
@@ -58,6 +58,33 @@ class Command_as_Impl with Command_Process_Mixin {
     ];
   }
 }
+
+class Command_clang_assemble_Impl with Command_Process_Mixin {
+  final String input;
+  final String output;
+
+  const Command_clang_assemble_Impl({
+    required this.input,
+    required this.output,
+  });
+
+  @override
+  String get command {
+    return "clang";
+  }
+
+  @override
+  List<String> get args {
+    return [
+      "-c",
+      "-arch",
+      "arm64",
+      "-o",
+      output,
+      input,
+    ];
+  }
+}
 // endregion
 
 // region objdump
@@ -65,7 +92,7 @@ class Command_objdump_Impl with Command_Process_Mixin {
   final String input;
 
   const Command_objdump_Impl({
-    required final this.input,
+    required this.input,
   });
 
   @override
@@ -89,7 +116,7 @@ class Object_nm_Impl with Command_Process_Mixin {
   final String input;
 
   const Object_nm_Impl({
-    required final this.input,
+    required this.input,
   });
 
   @override
@@ -113,8 +140,8 @@ class Command_ld_Impl with Command_Process_Mixin {
   final String input;
 
   const Command_ld_Impl({
-    required final this.output,
-    required final this.input,
+    required this.output,
+    required this.input,
   });
 
   @override
@@ -169,8 +196,8 @@ class Command_clang_Impl with Command_Process_Mixin {
   final String output;
 
   const Command_clang_Impl({
-    required final this.input,
-    required final this.output,
+    required this.input,
+    required this.output,
   });
 
   @override
@@ -203,8 +230,8 @@ class Command_WriteString_Impl with Command_WriteString_Mixin {
   final String path;
 
   const Command_WriteString_Impl({
-    required final this.content,
-    required final this.path,
+    required this.content,
+    required this.path,
   });
 }
 // endregion

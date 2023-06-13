@@ -52,12 +52,12 @@ void run_Commander({
       b.match(
         write_string: (final a) {
           print(
-            " * Writing file to:" + a.path + "'",
+            " * Writing file to: " + a.path + "'",
           );
         },
         process: (final a) {
           print(
-            " * Run command: '" + a.command + " " + a.args.join(" ") + "'",
+            " * Running command: '" + a.command + " " + a.args.join(" ") + "'",
           );
         },
       );
@@ -82,7 +82,7 @@ String run_and_take_output_commander(
   ).stdout.toString().trim();
 }
 
-// TODO remove this once interpreter can support it.
+// TODO remove this once the interpreter can support it.
 // TODO  or maybe add this as a step?
 /// Return a path to the given directory.
 ///

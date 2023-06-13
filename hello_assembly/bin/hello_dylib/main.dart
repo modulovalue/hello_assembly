@@ -164,7 +164,7 @@ class Bindings {
   final DynamicLibrary dylib;
 
   Bindings({
-    required final this.dylib,
+    required this.dylib,
   });
 
   String call_wrapped_example({
